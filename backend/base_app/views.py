@@ -1,16 +1,15 @@
-# from django.shortcuts import render
-# from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
+from django.contrib.auth.decorators import login_required
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, viewsets
+from django.http import FileResponse
 
-# from rest_framework import serializers
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from base_app.models import (Favorite,
+                             AdditionIngredient,
                              Recipe,
                              Tag,
                              Ingredient,
@@ -19,26 +18,10 @@ from base_app.models import (Favorite,
 from api.serializers import (RecipeSerializer, TagSerializer,
                              IngredientSerializer, CorrectRecipeSerializer
                              )
+from .utils import get_shop_list_pdf_binary
 from api.filters import IngredientSearchFilter, AuthorAndTagFilter
 from api.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from api.pagination import LimitPageNumberPagination
-
-
-# def index(request):
-#   return HttpResponse('Главная страница')
-
-
-@api_view(['GET', 'POST'])
-def recipe_list(request):
-    if request.method == 'POST':
-        serializer = Recipe(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    cats = Recipe.objects.all()
-    serializer = RecipeSerializer(cats, many=True)
-    return Response(serializer.data)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -105,3 +88,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response({
             'errors': 'Рецепт удален раннее'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+    @login_required
+    def shop_list_download(request):
+        ingredients_sum = {}
+        recipes = Recipe.objects.filter(shoppingcart__user=request.user)
+        ingredients = AdditionIngredient.objects.filter(
+            recipe__in=recipes).values_list(
+                                            'ingredient__name',
+                                            'quantity',
+                                            'ingredient__unit_of_measurement',
+                                            named=True
+                                            )
+
+        for ingredient in ingredients:
+            name = ingredient.ingredient__name
+            if name not in ingredients_sum:
+                ingredients_sum[name] = {
+                    'quantity': ingredient.quantity,
+                    'dimension': ingredient.ingredient__unit_of_measurement, }
+            else:
+                ingredients_sum[name]['quantity'] += ingredient.quantity
+        return FileResponse(
+            get_shop_list_pdf_binary(ingredients_sum),
+            filename='Shop_list.pdf',
+            as_attachment=True
+        )

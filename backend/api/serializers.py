@@ -1,58 +1,19 @@
-from rest_framework import serializers
+from base_app.models import (
+    AdditionIngredient,
+    Favorite,
+    Follow,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
+from users.serializers import CustomUserSerializer
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer, UserSerializer
-from base_app.models import (AdditionIngredient,
-                             Favorite,
-                             Follow,
-                             Recipe,
-                             Tag,
-                             Ingredient,
-                             ShoppingCart,
-                             )
-from rest_framework.validators import UniqueValidator
+
+from rest_framework import serializers
 
 
 User = get_user_model()
-
-
-class CustomUserCreateSerializer(UserCreateSerializer):
-    """Сериализатор модели User POST запрос."""
-    email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())])
-    username = serializers.CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())])
-
-    class Meta:
-        model = User
-        fields = ('id', 'first_name', 'last_name', 'username', 'email',
-                  'password')
-        extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-            'username': {'required': True},
-            'email': {'required': True},
-            'password': {'required': True},
-
-        }
-
-
-class CustomUserSerializer(UserSerializer):
-    """Сериализатор модели User GET запрос."""
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = ('id', 'first_name', 'last_name', 'username', 'email',
-                  'is_subscribed')
-
-    def get_is_subscribed(self, obj):
-        """
-        Статус подписки пользователя на юзеров.
-        """
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Follow.objects.filter(user=user, author=obj.id).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -84,7 +45,7 @@ class CorrectRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
 
-    tegs = TagSerializer(read_only=True, many=True)
+    tags = TagSerializer(read_only=True, many=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = AdditionIngredientSerializer(
         source='recipe_ingredient',
@@ -113,7 +74,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
-            AdditionIngredientSerializer.objects.create(
+            AdditionIngredientSerializer.objects.bulk_create(
                 recipe=recipe,
                 ingredient_id=ingredient.get("id"),
                 quantity=ingredient.get("quantity"),
@@ -121,21 +82,21 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         image = validated_data.pop('image')
-        teg = validated_data.pop('teg')
+        tag = validated_data.pop('tag')
         ingredients_data = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(image=image, **validated_data)
         self.create_ingredients(ingredients_data, recipe)
-        recipe.teg.set(teg)
+        recipe.tags.set(tag)
         return recipe
 
     def update(self, recipe, validated_data):
-        if "ingredients" in self.initial_data:
+        if "ingredients" in self.validated_data:
             ingredients = validated_data.pop('ingredients')
             recipe.ingredients.clear()
             self.create_ingredients(ingredients, recipe)
-        if "teg" in self.initial_data:
-            teg = validated_data.pop('tags')
-            recipe.teg.set(teg)
+        if "tags" in self.validated_data:
+            tag = validated_data.pop('tags')
+            recipe.tags.set(tag)
         return super().update(recipe, validated_data)
 
 

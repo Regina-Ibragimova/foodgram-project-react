@@ -10,12 +10,9 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    # Перечисляем поля, которые должны отображаться в админке
     list_display = ('name', 'description', 'author',)
-    # Добавляем интерфейс для поиска по тексту постов
-    search_fields = ('teg',)
-    # Добавляем возможность фильтрации по дате
-    list_filter = ('name', 'teg')
+    search_fields = ('tags',)
+    list_filter = ('name', 'tags')
     empty_value_display = '-пусто-'
 
 
