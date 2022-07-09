@@ -1,27 +1,22 @@
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
 from django.contrib.auth.decorators import login_required
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.response import Response
-from rest_framework import status, viewsets
 from django.http import FileResponse
-
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from base_app.models import (Favorite,
-                             AdditionIngredient,
-                             Recipe,
-                             Tag,
-                             Ingredient,
-                             ShoppingCart,
-                             )
-from api.serializers import (RecipeSerializer, TagSerializer,
-                             IngredientSerializer, CorrectRecipeSerializer
-                             )
-from .utils import get_shop_list_pdf_binary
-from api.filters import IngredientSearchFilter, AuthorAndTagFilter
-from api.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
+
+from api.filters import AuthorAndTagFilter, IngredientSearchFilter
 from api.pagination import LimitPageNumberPagination
+from api.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+
+from api.serializers import CorrectRecipeSerializer, IngredientSerializer
+from api.serializers import RecipeSerializer, TagSerializer
+from base_app.models import AdditionIngredient, Favorite, Ingredient, Recipe
+from base_app.models import ShoppingCart, Tag
+from base_app.utils import get_shop_list_pdf_binary
 
 
 class TagViewSet(ReadOnlyModelViewSet):

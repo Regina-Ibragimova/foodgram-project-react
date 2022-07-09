@@ -1,16 +1,9 @@
-from base_app.models import (
-    AdditionIngredient,
-    Favorite,
-    Follow,
-    Ingredient,
-    Recipe,
-    ShoppingCart,
-    Tag,
-)
-from users.serializers import CustomUserSerializer
+from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from rest_framework import serializers
+from base_app.models import AdditionIngredient, Favorite, Follow, Ingredient
+from base_app.models import Recipe, ShoppingCart, Tag
+from users.serializers import CustomUserSerializer
 
 
 User = get_user_model()

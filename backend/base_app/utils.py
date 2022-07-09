@@ -5,9 +5,9 @@ from django.conf import settings
 from fpdf import FPDF
 
 
-INVALID_QUANTITY = 'Неправильно задано количество у ингредиента {title}.'
-INGREDIENT_DOES_NOT_EXIST = 'Ингредиента {title} не существует.'
-INGREDIENT_ADDED = 'Ингредиент {title} добавлен в рецепт больше одного раза.'
+INVALID_QUANTITY = 'Неправильно задано количество у ингредиента {name}.'
+INGREDIENT_DOES_NOT_EXIST = 'Ингредиента {name} не существует.'
+INGREDIENT_ADDED = 'Ингредиент {name} добавлен в рецепт больше одного раза.'
 
 
 # настройки PDF
