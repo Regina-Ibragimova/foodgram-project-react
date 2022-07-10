@@ -135,28 +135,3 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return self.recipe
-
-
-class Follow(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='Подписчик',
-    )
-    author = models.ForeignKey(
-        User,
-        related_name='following',
-        on_delete=models.CASCADE,
-        verbose_name='автор рецепта'
-    )
-
-    class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'author'],
-                                    name='one_following')]
-
-    def __str__(self):
-        return f"Последователь: '{self.user}', автор: '{self.author}'"

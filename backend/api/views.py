@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -11,12 +13,11 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from api.filters import AuthorAndTagFilter, IngredientSearchFilter
 from api.pagination import LimitPageNumberPagination
 from api.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
-
-from api.serializers import CorrectRecipeSerializer, IngredientSerializer
-from api.serializers import RecipeSerializer, TagSerializer
-from base_app.models import AdditionIngredient, Favorite, Ingredient, Recipe
-from base_app.models import ShoppingCart, Tag
-from base_app.utils import get_shop_list_pdf_binary
+from api.serializers import (CorrectRecipeSerializer, IngredientSerializer,
+                             RecipeSerializer, TagSerializer)
+from base_app.models import (Favorite, Ingredient, Recipe,
+                             ShoppingCart, Tag)
+from api.utils import get_shop_list_pdf_binary
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -46,7 +47,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get', 'delete'],
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        """Добавление в избранное get-запрос."""
         if request.method == 'GET':
             return self.add_obj(Favorite, request.user, pk)
         elif request.method == 'DELETE':
@@ -56,7 +56,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        """Добавление и удаление в списоке покупок."""
         if request.method == 'GET':
             return self.add_obj(ShoppingCart, request.user, pk)
         elif request.method == 'DELETE':
@@ -64,7 +63,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return None
 
     def add_obj(self, model, user, pk):
-        """Добавить рецепт."""
         if model.objects.filter(user=user, recipe__id=pk).exists():
             return Response({
                 'errors': 'Рецепт уже добавлен в список'
@@ -75,7 +73,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_obj(self, model, user, pk):
-        """Удалить рецепт."""
         obj = model.objects.filter(user=user, recipe__id=pk)
         if obj.exists():
             obj.delete()
@@ -88,13 +85,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shop_list_download(request):
         ingredients_sum = {}
         recipes = Recipe.objects.filter(shoppingcart__user=request.user)
-        ingredients = AdditionIngredient.objects.filter(
-            recipe__in=recipes).values_list(
-                                            'ingredient__name',
-                                            'quantity',
-                                            'ingredient__unit_of_measurement',
-                                            named=True
-                                            )
+        ingredients = recipes.values('ingredient__name',
+                                     'ingredient__quantity',
+                                     'ingredient__unit_of_measurement',
+                                     named=True).order_by(
+                                     'ingredient__name').annotate(
+            ingredients_total=Sum('ingredient_quantities__quantity')
+        )
 
         for ingredient in ingredients:
             name = ingredient.ingredient__name

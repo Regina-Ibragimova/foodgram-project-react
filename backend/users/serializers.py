@@ -2,13 +2,13 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from base_app.models import Follow
+
+from users.models import Follow
 
 User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    """Сериализатор модели User POST запрос."""
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())])
     username = serializers.CharField(
@@ -29,7 +29,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
-    """Сериализатор модели User GET запрос."""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -38,9 +37,6 @@ class CustomUserSerializer(UserSerializer):
                   'is_subscribed')
 
     def get_is_subscribed(self, obj):
-        """
-        Статус подписки пользователя на юзеров.
-        """
         user = self.context.get('request').user
         if user.is_anonymous:
             return False

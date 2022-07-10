@@ -10,7 +10,6 @@ INGREDIENT_DOES_NOT_EXIST = 'Ингредиента {name} не существу
 INGREDIENT_ADDED = 'Ингредиент {name} добавлен в рецепт больше одного раза.'
 
 
-# настройки PDF
 BOTTOM_MARGIN = 15
 FONT_SIZE = 14
 HEIGHT = 8

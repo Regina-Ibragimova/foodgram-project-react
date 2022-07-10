@@ -1,9 +1,11 @@
+from requests import request
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from base_app.models import AdditionIngredient, Favorite, Follow, Ingredient
+from base_app.models import AdditionIngredient, Favorite, Ingredient
 from base_app.models import Recipe, ShoppingCart, Tag
 from users.serializers import CustomUserSerializer
+from users.models import Follow
 
 
 User = get_user_model()
@@ -66,12 +68,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            AdditionIngredientSerializer.objects.bulk_create(
-                recipe=recipe,
-                ingredient_id=ingredient.get("id"),
-                quantity=ingredient.get("quantity"),
-            )
+        batch_size = int(request.data.get('количество ингредиентов'))
+        bulk_list = list()
+        for _ in range(batch_size):
+            bulk_list.append(
+                AdditionIngredientSerializer(
+                    recipe=recipe,
+                    ingredient_id=ingredients.get("id"),
+                    quantity=ingredients.get("quantity")))
+
+        return AdditionIngredientSerializer.objects.bulk_create(bulk_list)
 
     def create(self, validated_data):
         image = validated_data.pop('image')
@@ -157,7 +163,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
                         'recipe': {'write_only': True}}
 
     def validate(self, data):
-        """Валидация при добавлении рецепта в список покупок."""
         if ShoppingCart.objects.filter(user=data['user'],
                                        recipe=data['recipe']).exists():
             raise serializers.ValidationError('Рецепт добавлен в список'
