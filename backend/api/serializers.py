@@ -1,4 +1,3 @@
-from requests import request
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
@@ -66,10 +65,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
     def create_ingredients(self, ingredients, recipe):
-        amount_of_input_inredients = int(request.data.get('количество '
-                                                          'ингредиентов'))
         bulk_list = list()
-        for _ in range(amount_of_input_inredients):
+        for ingredient in ingredients:
             bulk_list.append(
                 AdditionIngredientSerializer(
                     recipe=recipe,
@@ -88,11 +85,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, recipe, validated_data):
-        if "ingredients" in self.validated_data:
+        if 'ingredients' in self.validated_data:
             ingredients = validated_data.pop('ingredients')
             recipe.ingredients.clear()
             self.create_ingredients(ingredients, recipe)
-        if "tags" in self.validated_data:
+        if 'tags' in self.validated_data:
             tag = validated_data.pop('tags')
             recipe.tags.set(tag)
         return super().update(recipe, validated_data)
