@@ -3,7 +3,6 @@ from django.http import FileResponse
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -83,7 +82,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @login_required
     def shop_list_download(request):
-        ingredients_sum = {}
         recipes = Recipe.objects.filter(shoppingcart__user=request.user)
         ingredients = recipes.values('ingredient__name',
                                      'ingredient__quantity',
@@ -93,16 +91,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ingredients_total=Sum('ingredient_quantities__quantity')
         )
 
-        for ingredient in ingredients:
-            name = ingredient.ingredient__name
-            if name not in ingredients_sum:
-                ingredients_sum[name] = {
-                    'quantity': ingredient.quantity,
-                    'dimension': ingredient.ingredient__unit_of_measurement, }
-            else:
-                ingredients_sum[name]['quantity'] += ingredient.quantity
         return FileResponse(
-            get_shop_list_pdf_binary(ingredients_sum),
+            get_shop_list_pdf_binary(ingredients),
             filename='Shop_list.pdf',
-            as_attachment=True
+            as_attachment=True,
+            status=status.HTTP_200_OK
         )

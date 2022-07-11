@@ -30,8 +30,6 @@ class AdditionIngredientSerializer(serializers.ModelSerializer):
 
 
 class CorrectRecipeSerializer(serializers.ModelSerializer):
-    """Проверка полей."""
-
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
@@ -68,9 +66,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
     def create_ingredients(self, ingredients, recipe):
-        batch_size = int(request.data.get('количество ингредиентов'))
+        amount_of_input_inredients = int(request.data.get('количество '
+                                                          'ингредиентов'))
         bulk_list = list()
-        for _ in range(batch_size):
+        for _ in range(amount_of_input_inredients):
             bulk_list.append(
                 AdditionIngredientSerializer(
                     recipe=recipe,

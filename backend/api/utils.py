@@ -21,7 +21,6 @@ BOLD_FONT_FILE = os.path.join(fonts, 'DejaVuSansCondensed-Bold.ttf')
 
 
 def get_shop_list_pdf_binary(ingredients):
-    """Возвращает список покупок pdf в виде двоичных данных."""
     keys = sorted(ingredients.keys())
     pdf = FPDF()
     pdf.add_font('DejaVu', '', FONT_FILE, uni=True)
