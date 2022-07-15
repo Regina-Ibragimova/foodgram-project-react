@@ -81,13 +81,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     @login_required
-    def shop_list_download(request):
+    def shop_list_download(self, request):
         recipes = Recipe.objects.filter(shoppingcart__user=request.user)
         ingredients = recipes.values('ingredient__name',
                                      'ingredient__quantity',
                                      'ingredient__unit_of_measurement',
                                      named=True).order_by(
-                                     'ingredient__name').annotate(
+                                         'ingredient__name').annotate(
             ingredients_total=Sum('ingredient_quantities__quantity')
         )
 
