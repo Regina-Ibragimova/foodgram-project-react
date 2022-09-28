@@ -76,7 +76,7 @@ jobs:
         script: |
           sudo docker compose down
           # Выполняет pull образа с DockerHub
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ffoodgramm_backend:v2.11.1989
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramm_backend:v2.11.1989
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramm_frontend:v2.11.1989
           touch .env
             echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env 
@@ -86,4 +86,4 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            sudo docker compose up -d
+          sudo docker compose up -d
