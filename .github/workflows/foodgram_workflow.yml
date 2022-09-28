@@ -51,25 +51,15 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgramm:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgramm_backend:v2.11.1989
       
       - name: Push frontend to Docker Hub
         uses: docker/build-push-action@v2
         with:
           context: ./frontend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgramm_frontend:v2.11.1989
 
-  send_message:
-    runs-on: ubuntu-latest
-    needs: deploy
-    steps:
-      - name: send message
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ github.workflow }} успешно выполнен!
 
   deploy:
     runs-on: ubuntu-latest
@@ -84,9 +74,16 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
+          sudo docker compose down
           # Выполняет pull образа с DockerHub
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramm
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-          #остановка всех контейнеров
-          sudo docker stop $(sudo docker ps -a -q)
-          sudo docker run --rm -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/foodgramm
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ffoodgramm_backend:v2.11.1989
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgramm_frontend:v2.11.1989
+          touch .env
+            echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env 
+            echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
+            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+            sudo docker compose up -d

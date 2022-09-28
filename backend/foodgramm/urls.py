@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -7,3 +9,8 @@ urlpatterns = [
     path('api/', include('users.urls', namespace='api_users')),
     path('api/', include('api.urls', namespace='api_base_app')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+    )

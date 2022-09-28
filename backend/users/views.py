@@ -16,7 +16,7 @@ User = get_user_model()
 class CustomUserViewSet(UserViewSet):
     pagination_class = LimitPageNumberPagination
 
-    @action(detail=True, permission_classes=[IsAuthenticated])
+    @action((['POST']), detail=True, permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
@@ -37,7 +37,7 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def del_subscribe(self, request, id=None):
+    def det_is_subscribed(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
         if user == author:

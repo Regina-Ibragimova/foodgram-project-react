@@ -9,22 +9,25 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=200,
                             unique=True,
                             verbose_name='Название ингредиента')
-    unit_of_measurement = models.CharField(max_length=200,
-                                           verbose_name='единицы измерения')
+    measurement_unit = models.CharField(max_length=200,
+                                        verbose_name='единицы измерения')
 
     class Meta:
         ordering = ['-id']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
+
 
 class Tag(models.Model):
-    title = models.CharField(max_length=200,
-                             unique=True,
-                             verbose_name='Название тега')
+    name = models.CharField(max_length=200,
+                            unique=True,
+                            verbose_name='Название тега')
     color = ColorField('Цвет в HEX',
                        default='#FF0000')
-    slug = models.SlugField(unique=True, default=title,
+    slug = models.SlugField(unique=True, default=name,
                             verbose_name='Уникальный Slug тега')
 
     class Meta:
@@ -33,7 +36,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Recipe(models.Model):
@@ -41,7 +44,7 @@ class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='recipes',
                                verbose_name='Автор')
-    description = models.TextField(verbose_name='Рецепт')
+    text = models.TextField(verbose_name='Рецепт')
     image = models.ImageField(verbose_name='фото блюда',
                               upload_to='base_app/',
                               null=True, blank=True)
@@ -75,7 +78,7 @@ class AdditionIngredient(models.Model):
                                related_name='add_ingredients',
                                verbose_name='Рецепт',
                                )
-    quantity = models.PositiveIntegerField(verbose_name='количество')
+    amount = models.PositiveIntegerField(verbose_name='количество')
 
     class Meta:
         ordering = ['-id']

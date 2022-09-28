@@ -11,19 +11,19 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'author',)
-    search_fields = ('tags',)
+    list_display = ('name', 'text', 'author', 'id')
+    search_fields = ('tags', 'name', 'author', 'id')
     list_filter = ('name', 'tags')
     empty_value_display = '-пусто-'
 
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('title', 'color', 'slug')
+    list_display = ('id', 'name', 'color', 'slug')
     empty_value_display = '-пусто-'
 
 
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'unit_of_measurement')
+    list_display = ('name', 'measurement_unit')
     empty_value_display = '-пусто-'
 
 

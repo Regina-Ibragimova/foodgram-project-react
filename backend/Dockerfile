@@ -1,4 +1,4 @@
-FROM python:3.8.5
+FROM python:3.9
 
 WORKDIR /code
 
@@ -8,4 +8,5 @@ RUN pip install --upgrade pip && pip install -r ./requirements.txt
 
 COPY . .
 
-CMD ["python3", "manage.py", "runserver", "0:8000"] 
+#CMD ["gunicorn", "foodgramm.wsgi:application", "--bind", "0:8000" ] 
+CMD ["python3", "manage.py", "runserver", "0:5000"]
