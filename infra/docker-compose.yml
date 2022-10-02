@@ -3,19 +3,14 @@ services:
 
   db:
     image: postgres:13.0-alpine
-    restart: always
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - DB_ENGINE=django.db.backends.postgresql 
-      - DB_NAME=postgres 
-      - POSTGRES_USER=postgres 
-      - POSTGRES_PASSWORD=postgres 
-      - DB_HOST=db
-      - DB_PORT=5432
+      - /var/lib/postgresql/data/
+    env_file:
+      - ./.env  
+
 
   backend:
-    image: reginaibragimova/foodgramm_backend:v2.11.1989
+    image: reginaibragimova/gatefoodgramm_backends:v2.11.1989
     container_name: foodgram_backend
     restart: always
     volumes:
@@ -26,7 +21,7 @@ services:
     env_file:
       - ./.env
   frontend:
-    image: reginaibragimova/foodgramm_frontend:v2.11.1989
+    image: reginaibragimova/gatefoodgramm_frontends:v2.11.1989
     container_name: foodgram_frontend
     restart: always
     volumes:
@@ -43,8 +38,7 @@ services:
       - static_value:/var/html/static/
       - media_value:/var/html/media/
     restart: always
-    depends_on:
-      - frontend
+
 
 volumes:
   postgres_data:
