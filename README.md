@@ -19,7 +19,7 @@ Foodgram реализован для публикации рецептов. Ав
 - **Git**, 
 - Аутентификация реализована с помощью **токена**.
 
-Подготовка и запуск проекта
+### Инструкция по установке и запуску проекта
 Склонировать репозиторий на локальную машину:
 git clone https://github.com/Regina-Ibragimova/foodgram-project-react.git
 На удаленном сервере:
@@ -67,5 +67,5 @@ cоздать суперпользователя Django:
 sudo docker-compose exec web python manage.py createsuperuser
 
 
-Автор
+### Автор
 Регина Ибрагимова
