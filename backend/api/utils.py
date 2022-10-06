@@ -38,8 +38,8 @@ def get_shop_list_pdf_binary(ingredients):
     for index, title in enumerate(keys):
         pdf.cell(10, HEIGHT, f'{index + 1}.', 1, 0, 'C', )
         pdf.cell(140, HEIGHT, title, 1, 0, 'L', )
-        text = (f'{ingredients[title]["quantity"]} '
-                f'{ingredients[title]["dimension"]}')
+        text = (f'{ingredients[title]["amount"]} '
+                f'{ingredients[title]["measurement_unit"]}')
         pdf.cell(30, HEIGHT, text, 1, 1, 'C', )
 
     pdf.cell(180, HEIGHT, '', 0, 1, 'C', )

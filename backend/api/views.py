@@ -1,6 +1,4 @@
-# from wsgiref import validate
-from django.contrib.auth.decorators import login_required
-from django.http import FileResponse
+from django.http import HttpResponse
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,9 +15,8 @@ from api.permissions import IsAdminOrReadOnly
 from api.serializers import (IngredientSerializer,
                              RecipeListSerializer, RecipeWriteSerializer,
                              RecipeRepresentationSerializer, TagSerializer)
-from base_app.models import (Favorite, Ingredient, Recipe,
+from base_app.models import (AdditionIngredient, Favorite, Ingredient, Recipe,
                              ShoppingCart, Tag)
-from api.utils import get_shop_list_pdf_binary
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -108,20 +105,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'errors': 'Рецепт удален раннее'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    @login_required
-    def shop_list_download(self, request):
-        recipes = Recipe.objects.filter(shoppingcart__user=request.user)
-        ingredients = recipes.values('ingredient__name',
-                                     'ingredient__amount',
-                                     'ingredient__measurement_unit',
-                                     named=True).order_by(
-                                         'ingredient__name').annotate(
-            ingredients_total=Sum('ingredient_amounts__amount')
-        )
+    @action(
+        methods=['GET'],
+        detail=False,
+        permission_classes=(IsAuthenticated,)
+    )
+    def download_shopping_cart(self, request):
+        user = request.user
+        ingredients = AdditionIngredient.objects.filter(
+            recipe__cart__user=request.user).values(
+                'ingredient__name',
+                'ingredient__measurement_unit').annotate(amount=Sum('amount'))
+        shopping_list = ('')
+        for ingredient in ingredients:
+            shopping_list += (
+                f'{ingredient["ingredient__name"]} - '
+                f'{ingredient["amount"]} '
+                f'{ingredient["ingredient__measurement_unit"]}'
+            )
 
-        return FileResponse(
-            get_shop_list_pdf_binary(ingredients),
-            filename='Shop_list.pdf',
-            as_attachment=True,
-            status=status.HTTP_200_OK
-        )
+        filename = 'Shop_list.txt'
+
+        response = HttpResponse(shopping_list, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response

@@ -130,6 +130,7 @@ DJOSER = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+UPLOAD_FILE_NAME = 'shopping_cart.pdf'
 
 # CORS_ALLOWED_ORIGINS = [
 #    'http://localhost:3000',
